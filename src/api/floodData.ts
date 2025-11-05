@@ -20,14 +20,6 @@ export interface areaFloodData {
   timeSeverityChanged: Date;
 }
 
-export const fetchData = async (): Promise<Array<areaFloodData>> => {
-  const result = await fetch(
-    `https://environment.data.gov.uk/flood-monitoring/id/floods`
-  );
-  const dataset = await result.json();
-  return dataset.items;
-};
-
 export interface floodWarning {
   "@id": string;
   description: string;
@@ -82,6 +74,14 @@ export interface detailedData {
     type: string[];
   };
 }
+
+export const fetchData = async (): Promise<Array<areaFloodData>> => {
+  const result = await fetch(
+    `https://environment.data.gov.uk/flood-monitoring/id/floods`
+  );
+  const dataset = await result.json();
+  return dataset.items;
+};
 
 export const fecthDetails = async (id: string): Promise<detailedData> => {
   const result = await fetch(

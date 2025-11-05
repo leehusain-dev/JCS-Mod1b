@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import {
   fecthDetails,
@@ -8,7 +6,25 @@ import {
   type areaFloodData,
   type detailedData,
   type floodWarning,
-} from "./api";
+} from "./api/floodData";
+import Map from "./Map/Map.tsx";
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select, { type SelectChangeEvent } from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import Typography from "@mui/material/Typography";
+
+const mapsApiKey: string = "AIzaSyAs60wpHMVEJN32t9j7D49tEG1iS55-_Aw"
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
 
 function App() {
   const [floodData, setFloodData] = useState<Array<areaFloodData>>([]);
@@ -17,59 +33,72 @@ function App() {
   const [selectedRegion, setSelectedRegion] = useState<string>("no data");
   const [selectedArea, setSelectedArea] = useState<string>("no data");
   const [warningDetail, setWarningDetail] = useState<floodWarning>();
+  const [loading, setLoading] = useState<boolean>(true)
 
-  useEffect(() => {
+  useEffect(() => {   //Initial load - fetches full flood warning dataset
     fetchData().then(setFloodData);
   }, []);
 
   useEffect(() => {
-    const names = floodData.map((region) => region.eaAreaName);
-    setAreaNames([...new Set(names)]);
+    console.log("Loading=", loading)
+  }, [loading]);
+
+  useEffect(() => {   //Filters unique top-level area names from items
+    const names = floodData.map((area) => area.eaAreaName);
+    setAreaNames([...new Set(names)].sort());
+    setLoading(false)
   }, [floodData]);
 
-  useEffect(() => {
+  useEffect(() => {   //Filters options for sub-region based on selected area
     setRegionNames(
-      floodData.filter((item) => item.eaAreaName === selectedArea)
+      floodData.filter((region) => region.eaAreaName === selectedArea).sort()
     );
   }, [selectedArea]);
 
-  useEffect(() => {
+  useEffect(() => {   //Fetches detailed flood warning info for chosen region
     if (selectedRegion !== "no data") {
       fecthDetails(selectedRegion).then((detail) =>
         setWarningDetail(detail.items.currentWarning)
-      );
+      )
     }
   }, [selectedRegion]);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <select id="areaSelect" onChange={(e) => setSelectedArea(e.target.value)}>
-        {areaNames.map((item) => (
-          <option key={item} value={item}>
-            {item}
-          </option>
-        ))}
-      </select>
-      <select
-        id="regionSelect"
-        onChange={(e) => setSelectedRegion(e.target.value)}
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <Backdrop
+        open={loading}
       >
-        {regionNames.map((item) => (
-          <option key={item.floodAreaID} value={item.floodAreaID}>
-            {item.description}
-          </option>
-        ))}
-      </select>
-    </>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Typography variant="h3">Flood Warnings</Typography>
+      <Typography variant="subtitle1">Real-time data from the Environment Agency API</Typography>
+      {!loading && (<><FormControl fullWidth>
+        <Select id="areaSelect" onChange={(e: SelectChangeEvent) => setSelectedArea(e.target.value)} defaultValue="">
+          {areaNames.map((item) => (
+            <MenuItem key={item} value={item}>
+              {item}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+        <FormControl fullWidth>
+          <Select
+            id="regionSelect"
+            onChange={(e: SelectChangeEvent) => setSelectedRegion(e.target.value)} defaultValue=""
+          >
+            {regionNames.map((item) => (item &&
+              <MenuItem key={item.floodAreaID} value={item.floodAreaID}>
+                {item.description}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl></>)
+      }
+
+      <Map />
+
+    </ThemeProvider >
   );
 }
 
