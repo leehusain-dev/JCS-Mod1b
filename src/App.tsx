@@ -73,31 +73,35 @@ function App() {
       </Backdrop>
       <Typography variant="h3">Flood Warnings</Typography>
       <Typography variant="subtitle1">Real-time data from the Environment Agency API</Typography>
-      {!loading && (<><FormControl fullWidth>
-        <Select id="areaSelect" onChange={(e: SelectChangeEvent) => setSelectedArea(e.target.value)} defaultValue="">
-          {areaNames.map((item) => (
-            <MenuItem key={item} value={item}>
-              {item}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-        <FormControl fullWidth>
-          <Select
-            id="regionSelect"
-            onChange={(e: SelectChangeEvent) => setSelectedRegion(e.target.value)} defaultValue=""
-          >
-            {regionNames.map((item) => (item &&
-              <MenuItem key={item.floodAreaID} value={item.floodAreaID}>
-                {item.description}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl></>)
+
+      {!loading && (
+        <>
+          <FormControl fullWidth>
+            <Select id="areaSelect" onChange={(e: SelectChangeEvent) => setSelectedArea(e.target.value)} defaultValue="">
+              {areaNames.map((item) => (
+                <MenuItem key={item} value={item}>
+                  {item}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth>
+            <Select
+              id="regionSelect"
+              onChange={(e: SelectChangeEvent) => setSelectedRegion(e.target.value)} defaultValue=""
+            >
+              {regionNames.map((item) => (item &&
+                <MenuItem key={item.floodAreaID} value={item.floodAreaID}>
+                  {item.description}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <Map />
+        </>
+      )
       }
-
-      <Map />
-
     </ThemeProvider >
   );
 }
