@@ -1,83 +1,100 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import {
-  fecthDetails,
-  fetchData,
-  type areaFloodData,
+  processData,
   type detailedData,
-  type floodWarning,
+  type warningInfo,
 } from "./api/floodData";
 import Map from "./Map/Map.tsx";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 import Typography from "@mui/material/Typography";
 
-const mapsApiKey: string = "AIzaSyAs60wpHMVEJN32t9j7D49tEG1iS55-_Aw"
+const mapsApiKey: string = "AIzaSyAs60wpHMVEJN32t9j7D49tEG1iS55-_Aw";
 
 const darkTheme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: "dark",
   },
 });
 
 function App() {
-  const [floodData, setFloodData] = useState<Array<areaFloodData>>([]);
-  const [regionNames, setRegionNames] = useState<Array<areaFloodData>>([]);
-  const [areaNames, setAreaNames] = useState<Array<string>>([]);
-  const [selectedRegion, setSelectedRegion] = useState<string>("no data");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [floodData, setFloodData] = useState<warningInfo[]>([]);
+  const [areaNames, setAreaNames] = useState<string[]>([]);
+  const [areaDescs, setAreaDescs] = useState<string[]>([]);
   const [selectedArea, setSelectedArea] = useState<string>("no data");
-  const [warningDetail, setWarningDetail] = useState<floodWarning>();
-  const [loading, setLoading] = useState<boolean>(true)
+  const [selectedDesc, setSelectedDesc] = useState<string>("no data");
+  const [warningDetail, setWarningDetail] = useState<warningInfo>();
 
-  useEffect(() => {   //Initial load - fetches full flood warning dataset
-    fetchData().then(setFloodData);
+  useEffect(() => {
+    //Initial load - fetches full flood warning dataset
+    processData()
+      .then(setFloodData)
+      .then(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    console.log("Loading=", loading)
+    console.log("Loading=", loading);
   }, [loading]);
 
-  useEffect(() => {   //Filters unique top-level area names from items
-    const names = floodData.map((area) => area.eaAreaName);
+  useEffect(() => {
+    //Filters unique top-level area names from items
+    const names = floodData.map((detail) => detail.warning.eaAreaName);
     setAreaNames([...new Set(names)].sort());
-    setLoading(false)
   }, [floodData]);
 
-  useEffect(() => {   //Filters options for sub-region based on selected area
-    setRegionNames(
-      floodData.filter((region) => region.eaAreaName === selectedArea).sort()
-    );
+  useEffect(() => {
+    //Filters options for sub-region based on selected area
+    const descs = floodData
+      .filter((detail) => detail.warning.eaAreaName === selectedArea)
+      .map((area) => area.warning.description);
+    setAreaDescs([...new Set(descs)].sort());
   }, [selectedArea]);
 
-  useEffect(() => {   //Fetches detailed flood warning info for chosen region
-    if (selectedRegion !== "no data") {
-      fecthDetails(selectedRegion).then((detail) =>
-        setWarningDetail(detail.items.currentWarning)
-      )
+  useEffect(() => {
+    //Fetches detailed flood warning info for chosen region
+    if (selectedDesc !== "no data") {
+      setWarningDetail(
+        floodData.find((detail) => detail.warning.description === selectedDesc)
+      );
     }
-  }, [selectedRegion]);
+  }, [selectedDesc]);
+
+  useEffect(() => {
+    //Fetches detailed flood warning info for chosen region
+    console.log(warningDetail?.warning.message);
+  }, [warningDetail]);
 
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <Backdrop
-        open={loading}
-      >
+      <Backdrop open={loading}>
         <CircularProgress color="inherit" />
       </Backdrop>
       <Typography variant="h3">Flood Warnings</Typography>
-      <Typography variant="subtitle1">Real-time data from the Environment Agency API</Typography>
+      <Typography variant="subtitle1">
+        Real-time data from the Environment Agency API
+      </Typography>
 
       {!loading && (
         <>
           <FormControl fullWidth>
-            <Select id="areaSelect" onChange={(e: SelectChangeEvent) => setSelectedArea(e.target.value)} defaultValue="">
+            <Select
+              id="areaSelect"
+              onChange={(e: SelectChangeEvent) =>
+                setSelectedArea(e.target.value)
+              }
+              defaultValue=""
+            >
+              <MenuItem disabled value="">
+                <em>Select Area</em>
+              </MenuItem>
               {areaNames.map((item) => (
                 <MenuItem key={item} value={item}>
                   {item}
@@ -88,21 +105,29 @@ function App() {
           <FormControl fullWidth>
             <Select
               id="regionSelect"
-              onChange={(e: SelectChangeEvent) => setSelectedRegion(e.target.value)} defaultValue=""
+              onChange={(e: SelectChangeEvent) =>
+                setSelectedDesc(e.target.value)
+              }
+              defaultValue=""
             >
-              {regionNames.map((item) => (item &&
-                <MenuItem key={item.floodAreaID} value={item.floodAreaID}>
-                  {item.description}
-                </MenuItem>
-              ))}
+              <MenuItem disabled value="">
+                <em>Select region</em>
+              </MenuItem>
+              {areaDescs.map(
+                (item) =>
+                  item && (
+                    <MenuItem key={item} value={item}>
+                      {item}
+                    </MenuItem>
+                  )
+              )}
             </Select>
           </FormControl>
 
           <Map />
         </>
-      )
-      }
-    </ThemeProvider >
+      )}
+    </ThemeProvider>
   );
 }
 

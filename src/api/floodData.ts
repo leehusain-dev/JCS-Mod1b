@@ -75,7 +75,13 @@ export interface detailedData {
   };
 }
 
-export const fetchData = async (): Promise<Array<areaFloodData>> => {
+export interface warningInfo {
+  warning: floodWarning;
+  lat: number;
+  long: number;
+}
+
+const fetchData = async (): Promise<Array<areaFloodData>> => {
   const result = await fetch(
     `https://environment.data.gov.uk/flood-monitoring/id/floods`
   );
@@ -83,10 +89,29 @@ export const fetchData = async (): Promise<Array<areaFloodData>> => {
   return dataset.items;
 };
 
-export const fecthDetails = async (id: string): Promise<detailedData> => {
+const fetchDetails = async (id: string): Promise<detailedData> => {
   const result = await fetch(
     `https://environment.data.gov.uk/flood-monitoring/id/floodAreas/${id}`
   );
   const data = await result.json();
   return data;
+};
+
+export const processData = async (): Promise<warningInfo[]> => {
+  const areaIDs: string[] = (await fetchData()).map((area) => area.floodAreaID);
+  const warnings: detailedData[] = [];
+  await Promise.all(
+    areaIDs.map(async (area) => {
+      warnings.push(await fetchDetails(area));
+    })
+  );
+  const strippedWarnings: warningInfo[] = [];
+  warnings.map((detail) =>
+    strippedWarnings.push({
+      warning: detail.items.currentWarning,
+      lat: detail.items.lat,
+      long: detail.items.long,
+    })
+  );
+  return strippedWarnings;
 };
