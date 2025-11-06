@@ -15,8 +15,6 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Typography from "@mui/material/Typography";
 
-const mapsApiKey: string = "AIzaSyAs60wpHMVEJN32t9j7D49tEG1iS55-_Aw";
-
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
@@ -68,7 +66,7 @@ function App() {
 
   useEffect(() => {
     //Fetches detailed flood warning info for chosen region
-    console.log(warningDetail?.warning.message);
+    //console.log(warningDetail?.warning.message);
   }, [warningDetail]);
 
   return (
@@ -90,11 +88,12 @@ function App() {
               onChange={(e: SelectChangeEvent) =>
                 setSelectedArea(e.target.value)
               }
-              defaultValue=""
+              defaultValue="All"
             >
               <MenuItem disabled value="">
                 <em>Select Area</em>
               </MenuItem>
+              <MenuItem value="All">All</MenuItem>
               {areaNames.map((item) => (
                 <MenuItem key={item} value={item}>
                   {item}
@@ -108,11 +107,12 @@ function App() {
               onChange={(e: SelectChangeEvent) =>
                 setSelectedDesc(e.target.value)
               }
-              defaultValue=""
+              defaultValue="All"
             >
               <MenuItem disabled value="">
                 <em>Select region</em>
               </MenuItem>
+              <MenuItem value="All">All</MenuItem>
               {areaDescs.map(
                 (item) =>
                   item && (
@@ -124,7 +124,7 @@ function App() {
             </Select>
           </FormControl>
 
-          <Map />
+          <Map markers={floodData} />
         </>
       )}
     </ThemeProvider>
