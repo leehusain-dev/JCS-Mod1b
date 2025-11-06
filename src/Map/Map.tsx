@@ -6,13 +6,19 @@ import configData from "./mapConfig";
 import Box from "@mui/material/Box";
 import type { warningInfo } from "../api/floodData";
 
-export interface MapProps {
+interface MapProps {
   markers: Array<warningInfo>;
 }
 
 export default function Map(data: MapProps) {
+  const warningColours: string[] = [
+    "rgba(255, 0, 0, 1)",
+    "rgba(255, 100, 0, 1)",
+    "rgba(255, 255, 0, 1)",
+    "rgba(0, 255, 0, 1)",
+  ];
   const mapContainer = useRef(null);
-  const map = useRef(null);
+  const map: React.RefObject<null> = useRef(null);
   const center = { lng: -2.5, lat: 54.5 };
   const [zoom] = useState(5.5);
   maptilersdk.config.apiKey = configData.MAPTILER_API_KEY;
@@ -28,7 +34,9 @@ export default function Map(data: MapProps) {
     });
 
     data.markers.forEach((marker) => {
-      new maptilersdk.Marker({ color: "#FF0000" })
+      new maptilersdk.Marker({
+        color: warningColours[marker.warning.severityLevel - 1],
+      })
         .setLngLat([marker.long, marker.lat])
         .addTo(map.current);
     });
