@@ -74,6 +74,9 @@ function App() {
       <CssBaseline />
       <Backdrop open={loading}>
         <CircularProgress color="inherit" />
+        <Typography variant="subtitle1">
+          Fetching and processing Environment Agency dataset
+        </Typography>
       </Backdrop>
       <Typography variant="h3">Flood Warnings</Typography>
       <Typography variant="subtitle1">

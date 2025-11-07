@@ -5,6 +5,7 @@ import "./map.css";
 import configData from "./mapConfig";
 import Box from "@mui/material/Box";
 import type { warningInfo } from "../api/floodData";
+import { Popup } from "maplibre-gl";
 
 interface MapProps {
   markers: Array<warningInfo>;
@@ -12,10 +13,10 @@ interface MapProps {
 
 export default function Map(data: MapProps) {
   const warningColours: string[] = [
-    "rgba(255, 0, 0, 1)",
-    "rgba(255, 100, 0, 1)",
-    "rgba(255, 255, 0, 1)",
-    "rgba(0, 255, 0, 1)",
+    "rgba(255, 0, 0, 1)", //severity 1
+    "rgba(255, 120, 0, 1)", //severity 2
+    "rgba(255, 255, 0, 1)", //severity 3
+    "rgba(0, 255, 0, 1)", //severity 4
   ];
   const mapContainer = useRef(null);
   const map: React.RefObject<null> = useRef(null);
@@ -38,7 +39,12 @@ export default function Map(data: MapProps) {
         color: warningColours[marker.warning.severityLevel - 1],
       })
         .setLngLat([marker.long, marker.lat])
-        .addTo(map.current);
+        .addTo(map.current)
+        .setPopup(
+          new Popup({ offset: 25 }).setText(
+            `Region:\n${marker.warning.description} \n\nMessage:\n${marker.warning.message}`
+          )
+        );
     });
   }, [center.lng, center.lat, zoom]);
 
