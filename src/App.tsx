@@ -24,11 +24,9 @@ const darkTheme = createTheme({
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const [floodData, setFloodData] = useState<warningInfo[]>([]);
-  const [areaNames, setAreaNames] = useState<string[]>([]);
-  const [areaDescs, setAreaDescs] = useState<string[]>([]);
-  const [selectedArea, setSelectedArea] = useState<string>("no data");
-  const [selectedDesc, setSelectedDesc] = useState<string>("no data");
-  const [warningDetail, setWarningDetail] = useState<warningInfo>();
+  const [regionNames, setRegionNames] = useState<string[]>([]);
+  const [selectedRegion, setSelectedRegion] = useState<string>("All");
+  const [regionalData, setRegionalData] = useState<warningInfo[]>([]);
 
   useEffect(() => {
     //Initial load - fetches full flood warning dataset
@@ -44,34 +42,22 @@ function App() {
   useEffect(() => {
     //Filters unique top-level area names from items
     const names = floodData.map((detail) => detail.warning.eaAreaName);
-    setAreaNames([...new Set(names)].sort());
+    setRegionNames([...new Set(names)].sort());
   }, [floodData]);
 
   useEffect(() => {
-    //Filters options for sub-region based on selected area
-    const descs = floodData
-      .filter((detail) => detail.warning.eaAreaName === selectedArea)
-      .map((area) => area.warning.description);
-    setAreaDescs([...new Set(descs)].sort());
-  }, [selectedArea]);
-
-  useEffect(() => {
-    //Fetches detailed flood warning info for chosen region
-    if (selectedDesc !== "no data") {
-      setWarningDetail(
-        floodData.find((detail) => detail.warning.description === selectedDesc)
-      );
-    }
-  }, [selectedDesc]);
-
-  useEffect(() => {
-    //Fetches detailed flood warning info for chosen region
-    //console.log(warningDetail?.warning.message);
-  }, [warningDetail]);
+    //Filters map markers by selected area
+    setRegionalData(
+      selectedRegion === "All"
+        ? floodData
+        : floodData.filter(
+            (detail) => detail.warning.eaAreaName === selectedRegion
+          )
+    );
+  }, [selectedRegion, floodData]);
 
   return (
-    <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
+    <>
       <Backdrop open={loading}>
         <CircularProgress color="inherit" />
         <Typography variant="subtitle1">
@@ -89,48 +75,26 @@ function App() {
             <Select
               id="areaSelect"
               onChange={(e: SelectChangeEvent) =>
-                setSelectedArea(e.target.value)
+                setSelectedRegion(e.target.value)
               }
               defaultValue="All"
             >
               <MenuItem disabled value="">
-                <em>Select Area</em>
+                <em>Select Region</em>
               </MenuItem>
               <MenuItem value="All">All</MenuItem>
-              {areaNames.map((item) => (
+              {regionNames.map((item) => (
                 <MenuItem key={item} value={item}>
                   {item}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-          <FormControl fullWidth>
-            <Select
-              id="regionSelect"
-              onChange={(e: SelectChangeEvent) =>
-                setSelectedDesc(e.target.value)
-              }
-              defaultValue="All"
-            >
-              <MenuItem disabled value="">
-                <em>Select region</em>
-              </MenuItem>
-              <MenuItem value="All">All</MenuItem>
-              {areaDescs.map(
-                (item) =>
-                  item && (
-                    <MenuItem key={item} value={item}>
-                      {item}
-                    </MenuItem>
-                  )
-              )}
-            </Select>
-          </FormControl>
 
-          <Map markers={floodData} />
+          <Map markers={regionalData} selectionState={selectedRegion} />
         </>
       )}
-    </ThemeProvider>
+    </>
   );
 }
 

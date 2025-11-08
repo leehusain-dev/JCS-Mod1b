@@ -7,11 +7,12 @@ import Box from "@mui/material/Box";
 import type { warningInfo } from "../api/floodData";
 import { Popup } from "maplibre-gl";
 
-interface MapProps {
+interface MapPropsType {
   markers: Array<warningInfo>;
+  selectionState: string;
 }
 
-export default function Map(data: MapProps) {
+export default function Map(mapProps: MapPropsType) {
   const warningColours: string[] = [
     "rgba(255, 0, 0, 1)", //severity 1
     "rgba(255, 120, 0, 1)", //severity 2
@@ -25,7 +26,9 @@ export default function Map(data: MapProps) {
   maptilersdk.config.apiKey = configData.MAPTILER_API_KEY;
 
   useEffect(() => {
-    if (map.current) return; // stops map from intializing more than once
+    if (map.current) {
+      map.current = null;
+    }
 
     map.current = new maptilersdk.Map({
       container: mapContainer.current,
@@ -34,7 +37,7 @@ export default function Map(data: MapProps) {
       zoom: zoom,
     });
 
-    data.markers.forEach((marker) => {
+    mapProps.markers.forEach((marker) => {
       new maptilersdk.Marker({
         color: warningColours[marker.warning.severityLevel - 1],
       })
@@ -42,11 +45,11 @@ export default function Map(data: MapProps) {
         .addTo(map.current)
         .setPopup(
           new Popup({ offset: 25 }).setText(
-            `Region:\n${marker.warning.description} \n\nMessage:\n${marker.warning.message}`
+            `Area:\n${marker.warning.description} \n\nMessage:\n${marker.warning.message}`
           )
         );
     });
-  }, [center.lng, center.lat, zoom]);
+  }, [mapProps]);
 
   return (
     <Box sx={{ display: "flex" }}>
