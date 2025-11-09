@@ -1,27 +1,16 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import {
-  processData,
-  type detailedData,
-  type warningInfo,
-} from "./api/floodData";
+import { processData, type warningInfo } from "./api/floodData";
 import Map from "./Map/Map.tsx";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import FormControl from "@mui/material/FormControl";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import RoomIcon from "@mui/icons-material/Room";
 import Grid from "@mui/material/Grid";
-
-const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-  },
-});
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
