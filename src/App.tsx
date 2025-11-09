@@ -12,8 +12,10 @@ import FormControl from "@mui/material/FormControl";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
 import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import RoomIcon from "@mui/icons-material/Room";
+import Grid from "@mui/material/Grid";
 
 const darkTheme = createTheme({
   palette: {
@@ -64,14 +66,18 @@ function App() {
           Fetching and processing Environment Agency dataset
         </Typography>
       </Backdrop>
-      <Typography variant="h3">Flood Warnings</Typography>
+
+      <Typography variant="h3">Live Flood Warnings</Typography>
       <Typography variant="subtitle1">
         Real-time data from the Environment Agency API
       </Typography>
 
       {!loading && (
-        <>
-          <FormControl fullWidth>
+        <Box marginTop={2}>
+          <Typography sx={{ color: "text.secondary", mb: 1.5 }}>
+            Filter map by region
+          </Typography>
+          <FormControl fullWidth sx={{ marginBottom: 2 }}>
             <Select
               id="areaSelect"
               onChange={(e: SelectChangeEvent) =>
@@ -90,9 +96,21 @@ function App() {
               ))}
             </Select>
           </FormControl>
-
+          <Typography sx={{ color: "text.secondary", mb: 1.5 }}>
+            Warning Key
+          </Typography>
+          <Grid container spacing={2} columns={4} justifyContent="center">
+            <RoomIcon sx={{ color: "rgba(255, 0, 0, 1)" }} />
+            <Typography>Severe Flood Warning </Typography>
+            <RoomIcon sx={{ color: "rgba(255, 120, 0, 1)" }} />
+            <Typography>Flood Warning </Typography>
+            <RoomIcon sx={{ color: "rgba(255, 255, 0, 1)" }} />
+            <Typography>Flood Alert </Typography>
+            <RoomIcon sx={{ color: "rgba(0,255, 0, 1)" }} />
+            <Typography>Warning no Longer in Force </Typography>
+          </Grid>
           <Map markers={regionalData} selectionState={selectedRegion} />
-        </>
+        </Box>
       )}
     </>
   );
