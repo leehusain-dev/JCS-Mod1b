@@ -26,6 +26,8 @@ export default function Map(mapProps: MapPropsType) {
   maptilersdk.config.apiKey = configData.MAPTILER_API_KEY;
 
   useEffect(() => {
+    if (configData.MAPTILER_API_KEY == "") return;
+
     if (map.current) {
       map.current = null;
     }
@@ -51,7 +53,9 @@ export default function Map(mapProps: MapPropsType) {
     });
   }, [mapProps]);
 
-  return (
+  return configData.MAPTILER_API_KEY == "" ? (
+    <h1>No Maptiler API key found. See JCS submission for API key</h1>
+  ) : (
     <Box sx={{ display: "flex" }}>
       <div className="container">
         <div ref={mapContainer} id="map" className="map" />
