@@ -98,14 +98,8 @@ function App() {
             <RoomIcon sx={{ color: "rgba(0,255, 0, 1)" }} />
             <Typography>Warning no Longer in Force </Typography>
           </Grid>
-          <Box
-            component="main"
-            sx={{ flexGrow: 1 }}
-            alignItems="left"
-            justifyContent="left"
-          >
-            <Map markers={regionalData} selectionState={selectedRegion} />
-          </Box>
+
+          <Map markers={regionalData} selectionState={selectedRegion} />
         </Box>
       )}
     </>

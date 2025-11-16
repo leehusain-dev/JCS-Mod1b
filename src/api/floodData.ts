@@ -79,7 +79,25 @@ export interface warningInfo {
   warning: floodWarning;
   lat: number;
   long: number;
+  radius: number;
 }
+
+const getRadius = (envelope: {
+  lowerCorner: {
+    x: number;
+    y: number;
+  };
+  upperCorner: {
+    x: number;
+    y: number;
+  };
+}) => {
+  const { lowerCorner, upperCorner } = envelope;
+  return Math.max(
+    Math.abs(lowerCorner.x - upperCorner.x),
+    Math.abs(lowerCorner.y - upperCorner.y)
+  );
+};
 
 const fetchData = async (): Promise<Array<areaFloodData>> => {
   const result = await fetch(
@@ -111,6 +129,7 @@ export const processData = async (): Promise<warningInfo[]> => {
       warning: detail.items.currentWarning,
       lat: detail.items.lat,
       long: detail.items.long,
+      radius: getRadius(detail.items.envelope),
     })
   );
   return strippedWarnings;

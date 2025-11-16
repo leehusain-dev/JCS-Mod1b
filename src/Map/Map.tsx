@@ -1,15 +1,7 @@
-import React, {
-  useRef,
-  useEffect,
-  useState,
-  useMemo,
-  type FC,
-  Fragment,
-} from "react";
+import { useMemo, Fragment } from "react";
 import "leaflet/dist/leaflet.css";
-import Box from "@mui/material/Box";
 import type { warningInfo } from "../api/floodData";
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { Circle, MapContainer, Popup, TileLayer } from "react-leaflet";
 
 interface MapPropsType {
   markers: Array<warningInfo>;
@@ -31,7 +23,6 @@ export default function Map(mapProps: MapPropsType) {
         scrollWheelZoom={true}
         style={{
           height: parent.innerHeight * 0.7,
-          width: parent.innerWidth * 0.9,
           position: "relative",
         }}
       >
@@ -42,17 +33,22 @@ export default function Map(mapProps: MapPropsType) {
         {mapProps.markers.map((marker, index) => {
           return (
             <Fragment key={index}>
-              <Marker position={[marker.lat, marker.long]}>
-                <Popup>{marker.warning.message}</Popup>
-              </Marker>
+              <Circle
+                center={[marker.lat, marker.long]}
+                pathOptions={{
+                  color: warningColours[marker.warning.severityLevel - 1],
+                }}
+                radius={marker.radius}
+              >
+                <Popup>
+                  <strong>Area: {marker.warning.description}</strong>
+                  <br />
+                  {marker.warning.message}
+                </Popup>
+              </Circle>
             </Fragment>
           );
         })}
-        <Marker position={[51.505, -0.09]}>
-          <Popup>
-            A pretty CSS3 popup. <br /> Easily customizable.
-          </Popup>
-        </Marker>
       </MapContainer>
     ),
     [mapProps]
