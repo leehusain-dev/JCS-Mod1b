@@ -1,11 +1,15 @@
-import React, { useRef, useEffect, useState } from "react";
-import * as maptilersdk from "@maptiler/sdk";
-import "@maptiler/sdk/dist/maptiler-sdk.css";
-import "./map.css";
-import configData from "./mapConfig";
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useMemo,
+  type FC,
+  Fragment,
+} from "react";
+import "leaflet/dist/leaflet.css";
 import Box from "@mui/material/Box";
 import type { warningInfo } from "../api/floodData";
-import { Popup } from "maplibre-gl";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 
 interface MapPropsType {
   markers: Array<warningInfo>;
@@ -19,47 +23,39 @@ export default function Map(mapProps: MapPropsType) {
     "rgba(255, 255, 0, 1)", //severity 3
     "rgba(0, 255, 0, 1)", //severity 4
   ];
-  const mapContainer = useRef(null);
-  const map: React.RefObject<null> = useRef(null);
-  const center = { lng: -2.5, lat: 54.5 };
-  const [zoom] = useState(5.5);
-  maptilersdk.config.apiKey = configData.MAPTILER_API_KEY;
-
-  useEffect(() => {
-    if (configData.MAPTILER_API_KEY == "") return;
-
-    if (map.current) {
-      map.current = null;
-    }
-
-    map.current = new maptilersdk.Map({
-      container: mapContainer.current,
-      style: maptilersdk.MapStyle.STREETS,
-      center: [center.lng, center.lat],
-      zoom: zoom,
-    });
-
-    mapProps.markers.forEach((marker) => {
-      new maptilersdk.Marker({
-        color: warningColours[marker.warning.severityLevel - 1],
-      })
-        .setLngLat([marker.long, marker.lat])
-        .addTo(map.current)
-        .setPopup(
-          new Popup({ offset: 25 }).setText(
-            `Area:\n${marker.warning.description} \n\nMessage:\n${marker.warning.message}`
-          )
-        );
-    });
-  }, [mapProps]);
-
-  return configData.MAPTILER_API_KEY == "" ? (
-    <h1>No Maptiler API key found. See JCS submission for API key</h1>
-  ) : (
-    <Box sx={{ display: "flex" }}>
-      <div className="container">
-        <div ref={mapContainer} id="map" className="map" />
-      </div>
-    </Box>
+  const displayMap = useMemo(
+    () => (
+      <MapContainer
+        center={[53, 0]}
+        zoom={7}
+        scrollWheelZoom={true}
+        style={{
+          height: parent.innerHeight * 0.7,
+          width: parent.innerWidth * 0.9,
+          position: "relative",
+        }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {mapProps.markers.map((marker, index) => {
+          return (
+            <Fragment key={index}>
+              <Marker position={[marker.lat, marker.long]}>
+                <Popup>{marker.warning.message}</Popup>
+              </Marker>
+            </Fragment>
+          );
+        })}
+        <Marker position={[51.505, -0.09]}>
+          <Popup>
+            A pretty CSS3 popup. <br /> Easily customizable.
+          </Popup>
+        </Marker>
+      </MapContainer>
+    ),
+    [mapProps]
   );
+  return <>{displayMap}</>;
 }
