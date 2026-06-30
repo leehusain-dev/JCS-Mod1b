@@ -1,4 +1,4 @@
-export interface areaFloodData {
+export interface AreaFloodData {
   "@id": string;
   description: string;
   eaAreaName: string;
@@ -20,7 +20,7 @@ export interface areaFloodData {
   timeSeverityChanged: Date;
 }
 
-export interface floodWarning {
+export interface FloodWarning {
   "@id": string;
   description: string;
   eaAreaName: string;
@@ -37,7 +37,7 @@ export interface floodWarning {
   type: string;
 }
 
-export interface detailedData {
+export interface DetailedData {
   "@context": string;
   meta: {
     publisher: string;
@@ -50,7 +50,7 @@ export interface detailedData {
   items: {
     "@id": string;
     county: string;
-    currentWarning: floodWarning;
+    currentWarning: FloodWarning;
     description: string;
     eaAreaName: string;
     envelope: {
@@ -75,8 +75,8 @@ export interface detailedData {
   };
 }
 
-export interface warningInfo {
-  warning: floodWarning;
+export interface WarningInfo {
+  warning: FloodWarning;
   lat: number;
   long: number;
   radius: number;
@@ -95,42 +95,42 @@ const getRadius = (envelope: {
   const { lowerCorner, upperCorner } = envelope;
   return Math.max(
     Math.abs(lowerCorner.x - upperCorner.x),
-    Math.abs(lowerCorner.y - upperCorner.y)
+    Math.abs(lowerCorner.y - upperCorner.y),
   );
 };
 
-const fetchData = async (): Promise<Array<areaFloodData>> => {
+const fetchData = async (): Promise<Array<AreaFloodData>> => {
   const result = await fetch(
-    `https://environment.data.gov.uk/flood-monitoring/id/floods`
+    `https://environment.data.gov.uk/flood-monitoring/id/floods`,
   );
   const dataset = await result.json();
   return dataset.items;
 };
 
-const fetchDetails = async (id: string): Promise<detailedData> => {
+const fetchDetails = async (id: string): Promise<DetailedData> => {
   const result = await fetch(
-    `https://environment.data.gov.uk/flood-monitoring/id/floodAreas/${id}`
+    `https://environment.data.gov.uk/flood-monitoring/id/floodAreas/${id}`,
   );
   const data = await result.json();
   return data;
 };
 
-export const processData = async (): Promise<warningInfo[]> => {
+export const processData = async (): Promise<WarningInfo[]> => {
   const areaIDs: string[] = (await fetchData()).map((area) => area.floodAreaID);
-  const warnings: detailedData[] = [];
+  const warnings: DetailedData[] = [];
   await Promise.all(
     areaIDs.map(async (area) => {
       warnings.push(await fetchDetails(area));
-    })
+    }),
   );
-  const strippedWarnings: warningInfo[] = [];
-  warnings.map((detail) =>
+  const strippedWarnings: WarningInfo[] = [];
+  warnings.forEach((detail) =>
     strippedWarnings.push({
       warning: detail.items.currentWarning,
       lat: detail.items.lat,
       long: detail.items.long,
       radius: getRadius(detail.items.envelope),
-    })
+    }),
   );
   return strippedWarnings;
 };

@@ -1,14 +1,14 @@
 import { useMemo, Fragment } from "react";
 import "leaflet/dist/leaflet.css";
-import type { warningInfo } from "../api/floodData";
+import type { WarningInfo } from "../api/floodData";
 import { Circle, MapContainer, Popup, TileLayer } from "react-leaflet";
 
 interface MapPropsType {
-  markers: Array<warningInfo>;
+  markers: Array<WarningInfo>;
   selectionState: string;
 }
 
-export default function Map(mapProps: MapPropsType) {
+export default function LeafletMap(mapProps: MapPropsType) {
   const warningColours: string[] = [
     "rgba(255, 0, 0, 1)", //severity 1
     "rgba(255, 120, 0, 1)", //severity 2
@@ -30,9 +30,9 @@ export default function Map(mapProps: MapPropsType) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {mapProps.markers.map((marker, index) => {
+        {mapProps.markers.map((marker) => {
           return (
-            <Fragment key={index}>
+            <Fragment key={marker.lat}>
               <Circle
                 center={[marker.lat, marker.long]}
                 pathOptions={{
@@ -51,7 +51,7 @@ export default function Map(mapProps: MapPropsType) {
         })}
       </MapContainer>
     ),
-    [mapProps]
+    [mapProps],
   );
   return <>{displayMap}</>;
 }

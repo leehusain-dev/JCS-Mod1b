@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { processData, type warningInfo } from "./api/floodData";
-import Map from "./Map/Map.tsx";
+import { processData, type WarningInfo } from "./api/floodData";
+import LeafletMap from "./Map/Map.tsx";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import FormControl from "@mui/material/FormControl";
@@ -14,10 +14,10 @@ import Grid from "@mui/material/Grid";
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
-  const [floodData, setFloodData] = useState<warningInfo[]>([]);
+  const [floodData, setFloodData] = useState<WarningInfo[]>([]);
   const [regionNames, setRegionNames] = useState<string[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<string>("All");
-  const [regionalData, setRegionalData] = useState<warningInfo[]>([]);
+  const [regionalData, setRegionalData] = useState<WarningInfo[]>([]);
 
   useEffect(() => {
     //Initial load - fetches full flood warning dataset
@@ -42,8 +42,8 @@ function App() {
       selectedRegion === "All"
         ? floodData
         : floodData.filter(
-            (detail) => detail.warning.eaAreaName === selectedRegion
-          )
+            (detail) => detail.warning.eaAreaName === selectedRegion,
+          ),
     );
   }, [selectedRegion, floodData]);
 
@@ -99,7 +99,7 @@ function App() {
             <Typography>Warning no Longer in Force </Typography>
           </Grid>
 
-          <Map markers={regionalData} selectionState={selectedRegion} />
+          <LeafletMap markers={regionalData} selectionState={selectedRegion} />
         </Box>
       )}
     </>
