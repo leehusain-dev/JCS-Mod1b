@@ -98,6 +98,7 @@ function App() {
             <RoomIcon sx={{ color: "rgba(0,255, 0, 1)" }} />
             <Typography>Warning no Longer in Force </Typography>
           </Grid>
+
           <Map markers={regionalData} selectionState={selectedRegion} />
         </Box>
       )}

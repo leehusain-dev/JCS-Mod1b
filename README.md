@@ -5,5 +5,4 @@ Interactive map of current flood warnings across the UK. Data is fetched from th
 ## How to run
 
 1. In the project root folder, use the command `npm install` to install relevant dependepncies
-2. Edit `./src/Map/mapConfig.ts` to assign the API key string in the project submission to the `MAPTILER_API_KEY` variable
-3. Use the command `npm run dev` to run the build, then open the localhost port linked in the terminal output
+2. Use the command `npm run dev` to run the build, then open the localhost port linked in the terminal output
